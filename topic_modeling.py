@@ -1,4 +1,5 @@
 from nltk.corpus import brown
+from nltk.corpus import reuters
 from gensim import corpora, models
 import normalization
 import logging
@@ -12,6 +13,15 @@ class BrownCorpus:
     def __iter__(self):
         for fileid in brown.fileids():
             yield self.dictionary.doc2bow(normalization.normalizeWords(brown.words(fileid)))
+
+
+class ReutersCorpus:
+    def __init__(self, dictionary):
+        self.dictionary = dictionary
+
+    def __iter__(self):
+        for fileid in reuters.fileids():
+            yield self.dictionary.doc2bow(normalization.normalizeWords(reuters.words(fileid)))
 
 
 
@@ -56,36 +66,39 @@ def loadModel(fname, type=""):
     return model
 
 
-def initModelPipeline():
+def initModelPipeline(corpusName="reuters"):
     '''Create and save all the necessary models. Assumes we use brown.words(..)
     returns lda model
     '''
 
     # logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
 
-    normalized_docs = [normalization.normalizeWords(brown.words(fileid)) for  fileid in brown.fileids()]
+    normalized_docs = [normalization.normalizeWords(reuters.words(fileid)) for  fileid in reuters.fileids()] \
+                      if corpusName == 'reuters' \
+                      else [normalization.normalizeWords(brown.words(fileid)) for  fileid in brown.fileids()]
+
     dictionary = corpora.Dictionary(normalized_docs)
-    saveDictionary(dictionary, 'brownDict.dict')
+    saveDictionary(dictionary, corpusName + 'Dict.dict')
 
-    brownCorpus = BrownCorpus(dictionary)
-    saveCorpus(brownCorpus, 'brownCorpus_bow_norm.mm')
+    corpus = ReutersCorpus(dictionary) if corpusName == 'reuters' else BrownCorpus(dictionary)
+    saveCorpus(corpus, corpusName + '_bow_norm.mm')
 
-    tfidfModel = models.TfidfModel(brownCorpus)
-    saveModel(tfidfModel, 'brown_tfidf_model.tfidf')
+    tfidfModel = models.TfidfModel(corpus)
+    saveModel(tfidfModel, corpusName + '_tfidf_model.tfidf')
 
-    tfidfCorpus = tfidfModel[brownCorpus]
-    saveCorpus(tfidfCorpus, 'brown_tfidf_corpus.mm')
+    tfidfCorpus = tfidfModel[corpus]
+    saveCorpus(tfidfCorpus, corpusName + '_tfidf_corpus.mm')
 
-    ldaModel = models.LdaModel(tfidfCorpus, id2word=dictionary, num_topics=100, passes=20, iterations=400)
-    saveModel(ldaModel, 'brown_lda_model.lda')
+    ldaModel = models.LdaModel(tfidfCorpus, id2word=dictionary, num_topics=90, passes=20, iterations=400)
+    saveModel(ldaModel, corpusName + '_lda_model.lda')
 
     ldaCorpus = ldaModel[tfidfCorpus]
-    saveCorpus(ldaCorpus, 'brown_lda_corpus.mm')
+    saveCorpus(ldaCorpus, corpusName + '_lda_corpus.mm')
 
 
-def loadPretrainedLDACorpusAndModel():
-    corpus = loadCorpus('brown_lda.corpus.mm')
-    model = loadModel('brown_lda_model.lda', 'LDA')
+def loadPretrainedLDACorpusAndModel(corpusName='reuters'):
+    corpus = loadCorpus(corpusName + '_lda_corpus.mm')
+    model = loadModel(corpusName + '_lda_model.lda', 'LDA')
 
     return corpus, model
 
