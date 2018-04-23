@@ -4,6 +4,7 @@ from sentiment import WatsonAnalyzer
 import normalization
 import topic_modeling
 import util
+import classification
 
 import json
 from pprint import pprint
@@ -13,6 +14,17 @@ import logging
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
 
+    # classification.saveObj(['one', 'two', 'three'], 'hello/world/there.txt' )
+    # classification.saveObj(['one', 'two', 'three'], 'pretrained/world/there.txt' )
+    # clf, vectorizer = classification.trainClassifier()
+    # classification.testClassifer(clf, vectorizer)
+
+    # pprint('=============================== SGD ========================\n')
+
+    # clf, vectorizer = classification.trainClassifier(clfType='sgd')
+    # classification.testClassifer(clf, vectorizer)
+
+    topic_modeling.initModelPipeline()
     #words = normalizeRaw(raw)
 
     # normalized_docs = [normalization.normalizeWords(brown.words(fileid)) for  fileid in brown.fileids()]
@@ -30,9 +42,9 @@ if __name__ == '__main__':
     # ldaModel = topic_modeling.loadLDA('brownLDA.lda')
 
     # topic_modeling.initModelPipeline()
-    corpus, model = topic_modeling.loadPretrainedLDACorpusAndModel()
+    # corpus, model = topic_modeling.loadPretrainedLDACorpusAndModel()
 
-    print(model.print_topics(10))
+    # print(model.print_topics(10))
 
     # for doc in corpus:
     #     print(doc)

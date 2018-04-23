@@ -3,6 +3,8 @@ from nltk.corpus import reuters
 from gensim import corpora, models
 import normalization
 import logging
+import util
+import os
 
 
 class BrownCorpus:
@@ -31,8 +33,11 @@ def saveDictionary(dictionary, fname):
     dictionary = corpora.Dictionary(normalized_doc)
     '''
 
+    if not os.path.exists(os.path.dirname(fname)):
+        util.mkdir(os.path.dirname(fname))
+
     dictionary.save(fname)
-    dictionary.save_as_text('Text_version_' + fname + '.txt')
+    dictionary.save_as_text(fname + '.txt')
 
 
 def loadDictionary(fname):
@@ -42,6 +47,10 @@ def loadDictionary(fname):
 
 
 def saveCorpus(corpus, fname):
+
+    if not os.path.exists(os.path.dirname(fname)):
+        util.mkdir(os.path.dirname(fname))
+
     corpora.MmCorpus.serialize(fname, corpus)
 
 
@@ -50,6 +59,9 @@ def loadCorpus(fname):
     return corpus
 
 def saveModel(model, fname):
+    if not os.path.exists(os.path.dirname(fname)):
+        util.mkdir(os.path.dirname(fname))
+
     model.save(fname)
 
 
@@ -61,7 +73,7 @@ def loadModel(fname, type=""):
     elif type == 'TFIDF':
         model = models.TfidfModel.load(fname)
     else:
-        raise Exception('Invalide type fo loadModel')
+        raise Exception('Invalid type fo loadModel')
 
     return model
 
@@ -72,33 +84,34 @@ def initModelPipeline(corpusName="reuters"):
     '''
 
     # logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
+    base_path = os.path.join('./pretrained/topics/', corpusName)
 
     normalized_docs = [normalization.normalizeWords(reuters.words(fileid)) for  fileid in reuters.fileids()] \
                       if corpusName == 'reuters' \
                       else [normalization.normalizeWords(brown.words(fileid)) for  fileid in brown.fileids()]
 
     dictionary = corpora.Dictionary(normalized_docs)
-    saveDictionary(dictionary, corpusName + 'Dict.dict')
+    saveDictionary(dictionary, os.path.join(base_path, corpusName + 'Dict.dict'))
 
     corpus = ReutersCorpus(dictionary) if corpusName == 'reuters' else BrownCorpus(dictionary)
-    saveCorpus(corpus, corpusName + '_bow_norm.mm')
+    saveCorpus(corpus, os.path.join(base_path, corpusName + '_bow_norm.mm'))
 
     tfidfModel = models.TfidfModel(corpus)
-    saveModel(tfidfModel, corpusName + '_tfidf_model.tfidf')
+    saveModel(tfidfModel, os.path.join(base_path, corpusName + '_tfidf_model.tfidf'))
 
     tfidfCorpus = tfidfModel[corpus]
-    saveCorpus(tfidfCorpus, corpusName + '_tfidf_corpus.mm')
+    saveCorpus(tfidfCorpus, os.path.join(base_path, corpusName + '_tfidf_corpus.mm'))
 
     ldaModel = models.LdaModel(tfidfCorpus, id2word=dictionary, num_topics=90, passes=20, iterations=400)
-    saveModel(ldaModel, corpusName + '_lda_model.lda')
+    saveModel(ldaModel, os.path.join(base_path, corpusName + '_lda_model.lda'))
 
     ldaCorpus = ldaModel[tfidfCorpus]
-    saveCorpus(ldaCorpus, corpusName + '_lda_corpus.mm')
+    saveCorpus(ldaCorpus, os.path.join(base_path, corpusName + '_lda_corpus.mm'))
 
 
-def loadPretrainedLDACorpusAndModel(corpusName='reuters'):
-    corpus = loadCorpus(corpusName + '_lda_corpus.mm')
-    model = loadModel(corpusName + '_lda_model.lda', 'LDA')
+def loadPretrainedLDACorpusAndModel(base_path='./pretrained/topics/reuters', corpusName='reuters'):
+    corpus = loadCorpus(os.path.join(base_path, corpusName + '_lda_corpus.mm'))
+    model = loadModel(os.path.join(base_path, corpusName + '_lda_model.lda', 'LDA'))
 
     return corpus, model
 
