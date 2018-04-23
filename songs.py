@@ -46,7 +46,7 @@ def selectSong( avgWordsPerSentence, joy=0, sadness=0, anger=0, fear=0, confiden
     closestSong = ""
     minDistance = float('inf')
 
-    for currSong, weightings in SONG_WEIGHTINGS:
+    for currSong, weightings in SONG_WEIGHTINGS.items():
         musicWeighting = weightings[0]
         songIsSmooth = weightings[1]
 
