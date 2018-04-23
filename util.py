@@ -1,9 +1,25 @@
 import json
+import os
+import shutil
 
 def getCredentials(file):
 
     credentials = json.load(open(file))
-    return (credentials['username'], credentials['password'])
+    return credentials['username'], credentials['password']
+
+
+
+def mkdir(path, overwrite=False):
+    """Makes all intermediate directories to make final directory. Internally uses mkdirs(..)"""
+
+    try:
+        os.makedirs(path)
+    except OSError:
+        if overwrite and os.path.exists(path):
+            shutil.rmtree(dir)
+            os.makedirs(path)
+
+
 
 CONTRACTION_KEYS = '''ain't
 aren't
@@ -233,3 +249,5 @@ you are
 you have'''.lower().split('\n')
 
 CONTRACTION_MAP = list(zip(CONTRACTION_KEYS, CONTRACTION_VALUES))
+
+CUSTOM_STOP_WORDS = ['would', 'could', 'also', 'like']

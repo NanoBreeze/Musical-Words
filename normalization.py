@@ -28,7 +28,8 @@ def removePunctuationsAndSpecialSymbols(words):
 
 
 def removeStopWords(words):
-    stopwds = stopwords.words('english')
+    stopwds = stopwords.words('english') + util.CUSTOM_STOP_WORDS
+
     filtered_words = [word for word in words if word not in stopwds]
 
     return filtered_words
@@ -41,7 +42,8 @@ def stemWords(words):
     return filtered_words
 
 def normalizeRaw(raw):
-    """@:param: raw is a string. Eg, 'Once upon a time, there was a bunny'"""
+    """@:param: raw is a string. Eg, 'Once upon a time, there was a bunny'
+    Returns a list of words"""
     raw = raw.lower()
     raw = expandContractions(raw, util.CONTRACTION_MAP)
     words = nltk.word_tokenize(raw)
