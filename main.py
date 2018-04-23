@@ -1,10 +1,12 @@
 from docstats import DocStats
 from nltk.corpus import brown
+from nltk.corpus import gutenberg
 from sentiment import WatsonAnalyzer
 import normalization
 import topic_modeling
 import util
 import classification
+import songs
 
 import json
 from pprint import pprint
@@ -24,7 +26,7 @@ if __name__ == '__main__':
     # clf, vectorizer = classification.trainClassifier(clfType='sgd')
     # classification.testClassifer(clf, vectorizer)
 
-    topic_modeling.initModelPipeline()
+    # topic_modeling.initModelPipeline()
     #words = normalizeRaw(raw)
 
     # normalized_docs = [normalization.normalizeWords(brown.words(fileid)) for  fileid in brown.fileids()]
@@ -56,6 +58,10 @@ if __name__ == '__main__':
 
     '''
     raw = gutenberg.raw('austen-sense.txt')[:1000]
+    stat = DocStats(raw)
+    stat.ratio.avgWordsPerSentence()
+
+
     username, password = util.getCredentials('credentials.json')
     text = 'Team, I know that times are tough! Product sales have been disappointing for the past three quarters. We have a competitive product, but we need to do a better job of selling it!'
 

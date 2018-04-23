@@ -1,0 +1,1 @@
+Songs are based on Chopin's preludes. Manually assess each song's joy, fear, sadness, anger, and confident levels, along with how "smooth" the song is.
