@@ -27,7 +27,7 @@ class _Ratio:
         # Modal words represent possibility.
         # Source: https://en.wikipedia.org/wiki/English_modal_verbs
         modalWords = ['can', 'could', 'may', 'might', 'shall', 'should', 'will', 'would', 'must']
-        modalWordCount = sum(word for word in words if word.lower() in modalWords)
+        modalWordCount = len([word for word in words if word.lower() in modalWords])
 
         self._modelWordRatio = modalWordCount / len(words)
 
